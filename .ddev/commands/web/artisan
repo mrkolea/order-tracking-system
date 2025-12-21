@@ -1,0 +1,8 @@
+#!/bin/bash
+
+## #ddev-generated
+## Description: Run laravel artisan inside the web container
+## Usage: artisan [flags] [args]
+## Example: "ddev artisan list" or "ddev artisan cache:clear"
+
+php artisan $@

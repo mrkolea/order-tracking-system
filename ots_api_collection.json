@@ -1,0 +1,180 @@
+{
+	"info": {
+		"_postman_id": "a8f1b396-f127-4a0e-9a5e-3d7dd11ee44c",
+		"name": "OTS_API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "16594668"
+	},
+	"item": [
+		{
+			"name": "Get Orders",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "{{app_url}}/orders",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"orders"
+					]
+				},
+				"description": "## Get Orders\n\n---\n\n**GET** `/api/orders`\n\nGet a paginated list of all orders. Optional filters available.\n\n### Query Parameters\n\n- `status` (optional) - Filter by status: `pending`, `shipped`, `delivered`, `canceled`\n    \n- `tag` (optional) - Filter by tag name or slug\n    \n\n### Example Request\n\n``` bash\n# Get all orders\nGET /api/orders\n# Filter by status\nGET /api/orders?status=shipped\n# Filter by tag\nGET /api/orders?tag=VIP\n# Combine filters\nGET /api/orders?status=pending&tag=urgent\n\n ```\n\n### Example Response\n\n``` json\n{\n  \"data\": [\n    {\n      \"id\": 1,\n      \"order_number\": \"ORD-001\",\n      \"status\": \"pending\",\n      \"total_amount\": \"99.99\",\n      \"tags\": [...],\n      \"items\": [...],\n      \"created_at\": \"2025-12-20 10:00:00\",\n      \"updated_at\": \"2025-12-20 10:00:00\"\n    }\n  ],\n  \"links\": {...},\n  \"meta\": {...}\n}\n\n ```\n\n\n## Order Statuses\n\nValid order statuses:\n\n- `pending` - Order is pending (default)\n- `shipped` - Order has been shipped\n- `delivered` - Order has been delivered\n- `canceled` - Order has been canceled\n---"
+			},
+			"response": []
+		},
+		{
+			"name": "UpdateOrderStatus",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"order_number\": \"ORD-1003\",\n    \"tags\": [\n        \"ISN4\"\n    ],\n    \"status\": \"pending\"\n}\n// pending\n// shipped",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{app_url}}/orders/ORD-1003",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"orders",
+						"ORD-1003"
+					]
+				},
+				"description": "## Update Order Status\n\n---\n\n**PUT** `/api/orders/{order_number}`\n\nUpdate an order's status and/or tags.\n\n### URL Parameters\n\n- `order_number` - The order number to update\n    \n\n### Request Body\n\nAt least one of the following is required:\n\n``` json\n{\n  \"status\": \"shipped\",\n  \"tags\": [\"VIP\", \"express\"]\n}\n\n ```\n\n### Fields\n\n- `status` (optional) - New status: `pending`, `shipped`, `delivered`, `canceled`\n    \n- `tags` (optional) - Array of tag names to replace existing tags\n    \n\n**Note**: At least one of `status` or `tags` must be provided.\n\n### Example Request\n\n``` bash\nPUT /api/orders/ORD-001\nContent-Type: application/json\n{\n  \"status\": \"shipped\",\n  \"tags\": [\"VIP\", \"express\"]\n}\n\n ```\n\n### Example Response (200 OK)\n\n``` json\n{\n  \"data\": {\n    \"id\": 1,\n    \"order_number\": \"ORD-001\",\n    \"status\": \"shipped\",\n    \"total_amount\": \"99.99\",\n    \"tags\": [\n      {\n        \"name\": \"VIP\",\n        \"slug\": \"vip\",\n        \"attached_at\": \"2025-12-20 10:00:00\"\n      },\n      {\n        \"name\": \"express\",\n        \"slug\": \"express\",\n        \"attached_at\": \"2025-12-20 11:00:00\"\n      }\n    ],\n    \"items\": [...],\n    \"created_at\": \"2025-12-20 10:00:00\",\n    \"updated_at\": \"2025-12-20 11:00:00\"\n  }\n}\n\n ```\n---\n## Order Statuses\n\nValid order statuses:\n\n- `pending` - Order is pending (default)\n- `shipped` - Order has been shipped\n- `delivered` - Order has been delivered\n- `canceled` - Order has been canceled"
+			},
+			"response": []
+		},
+		{
+			"name": "Create Order",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"order_number\": \"ORD-1003\",\n  \"total_amount\": 111.11,\n    \"tags\": [\n    \"new\",\n    \"priority\",\n    \"VIP\"\n  ],\n  \"items\": [\n    {\n      \"product_name\": \"Case\",\n      \"quantity\": 2,\n      \"price\": 2.22\n    },\n    {\n      \"product_name\": \"Cable\",\n      \"quantity\": 3,\n      \"price\": 3.33\n    }\n  ]\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{app_url}}/orders",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"orders"
+					]
+				},
+				"description": "## Create Order\n\n---\n\n**POST** `/api/orders`\n\nCreate a new order.\n\n### Request Body\n\n``` json\n{\n  \"order_number\": \"ORD-001\",\n  \"total_amount\": 99.99,\n  \"tags\": [\"VIP\", \"urgent\"],\n  \"items\": [\n    {\n      \"product_name\": \"Product 1\",\n      \"quantity\": 2,\n      \"price\": 49.99\n    }\n  ]\n}\n\n ```\n\n### Required Fields\n\n- `order_number` - Unique order identifier (string, max 255 chars)\n    \n- `total_amount` - Order total amount (numeric, min 0)\n    \n\n### Optional Fields\n\n- `tags` - Array of tag names (strings)\n    \n- `items` - Array of order items\n    \n    - `product_name` - Product name (required if items provided)\n        \n    - `quantity` - Quantity (required if items provided, integer, min 1)\n        \n    - `price` - Price per unit (required if items provided, numeric, min 0)\n        \n\n### Example Request\n\n``` bash\nPOST /api/orders\nContent-Type: application/json\n{\n  \"order_number\": \"ORD-001\",\n  \"total_amount\": 99.99,\n  \"tags\": [\"VIP\"],\n  \"items\": [\n    {\n      \"product_name\": \"Product 1\",\n      \"quantity\": 2,\n      \"price\": 49.99\n    }\n  ]\n}\n\n ```\n\n### Example Response (201 Created)\n\n``` json\n{\n  \"data\": {\n    \"id\": 1,\n    \"order_number\": \"ORD-001\",\n    \"status\": \"pending\",\n    \"total_amount\": \"99.99\",\n    \"tags\": [\n      {\n        \"name\": \"VIP\",\n        \"slug\": \"vip\",\n        \"attached_at\": \"2025-12-20 10:00:00\"\n      }\n    ],\n    \"items\": [\n      {\n        \"product_name\": \"Product 1\",\n        \"quantity\": 2,\n        \"price\": \"49.99\"\n      }\n    ],\n    \"created_at\": \"2025-12-20 10:00:00\",\n    \"updated_at\": \"2025-12-20 10:00:00\"\n  }\n}\n\n ```\n\n\n## Order Statuses\n\nValid order statuses:\n\n- `pending` - Order is pending (default)\n- `shipped` - Order has been shipped\n- `delivered` - Order has been delivered\n- `canceled` - Order has been canceled\n___"
+			},
+			"response": []
+		},
+		{
+			"name": "getOrderById",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{app_url}}/orders/ORD-1003",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"orders",
+						"ORD-1003"
+					]
+				},
+				"description": "## Get Order\n___\n**GET** `/api/orders/{order_number}`\n\nGet a single order by order number.\n\n### URL Parameters\n\n- `order_number` - The order number to retrieve\n\n### Example Request\n\n```bash\nGET /api/orders/ORD-001\n```\n\n### Example Response (200 OK)\n\n```json\n{\n  \"data\": {\n    \"id\": 1,\n    \"order_number\": \"ORD-001\",\n    \"status\": \"pending\",\n    \"total_amount\": \"99.99\",\n    \"tags\": [...],\n    \"items\": [...],\n    \"created_at\": \"2025-12-20 10:00:00\",\n    \"updated_at\": \"2025-12-20 10:00:00\"\n  }\n}\n```\n\n### Error Response (404 Not Found)\n\n```json\n{\n  \"message\": \"No query results for model [App\\\\Models\\\\Order].\"\n}\n```"
+			},
+			"response": []
+		},
+		{
+			"name": "DeleteOrderById",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{app_url}}/orders/ORD-1003",
+					"host": [
+						"{{app_url}}"
+					],
+					"path": [
+						"orders",
+						"ORD-1003"
+					]
+				},
+				"description": "## Delete Order\n___\n**DELETE** `/api/orders/{order_number}`\n\nSoft delete an order (order is not permanently removed).\n\n### URL Parameters\n\n- `order_number` - The order number to delete\n\n### Example Request\n\n```bash\nDELETE /api/orders/ORD-001\n```\n\n### Example Response (204 No Content)\n\nEmpty response body.\n\n### Response if Already Deleted (200 OK)\n\n```json\n{\n  \"message\": \"Order already deleted\"\n}\n```"
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "app_url",
+			"value": ""
+		}
+	]
+}
