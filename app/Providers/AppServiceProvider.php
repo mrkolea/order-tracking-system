@@ -8,8 +8,15 @@ use App\Services\ExternalOrderStatusService;
 use App\Services\OrderTrackingService;
 use Illuminate\Support\ServiceProvider;
 
+/**
+ * Application Service Provider class.
+ */
 class AppServiceProvider extends ServiceProvider
 {
+
+  /**
+   * Register any application services.
+   */
   public function register(): void
   {
     $this->app->bind(

@@ -9,6 +9,9 @@ use App\Services\Contracts\ExternalOrderStatusServiceInterface;
 use Illuminate\Http\Client\Factory as HttpFactory;
 use Illuminate\Http\Client\Response;
 
+/**
+ * Service class to interact with external order status API.
+ */
 class ExternalOrderStatusService implements ExternalOrderStatusServiceInterface
 {
   public const EXTERNAL_STATUS_ENDPOINT = 'https://external-api.test/orders/status';
@@ -50,7 +53,11 @@ class ExternalOrderStatusService implements ExternalOrderStatusServiceInterface
     $data = $response->json();
     $new_status = $data['status'] ?? null;
     if (! is_string($new_status)) {
-      $this->logFailure($order, $response, 'Missing or invalid status in response.');
+      $this->logFailure(
+        $order,
+        $response,
+        'Missing or invalid status in response.'
+      );
       throw new \RuntimeException('External order status API returned invalid data.');
     }
 
@@ -62,7 +69,11 @@ class ExternalOrderStatusService implements ExternalOrderStatusServiceInterface
     ];
 
     if (!in_array($new_status, $valid_statuses, true)) {
-      $this->logFailure($order, $response, "Invalid status received: {$new_status}");
+      $this->logFailure(
+        $order,
+        $response,
+        "Invalid status received: {$new_status}"
+      );
       throw new \RuntimeException("External order status API returned invalid status: {$new_status}");
     }
 
@@ -76,7 +87,11 @@ class ExternalOrderStatusService implements ExternalOrderStatusServiceInterface
     return $order;
   }
 
-  protected function logFailure(Order $order, Response $response, ?string $reason = null): void
+  protected function logFailure(
+    Order $order,
+    Response $response,
+    ?string $reason = null
+    ): void
   {
     Logger::error('External order status API failed', [
       'order_id' => $order->id(),

@@ -9,11 +9,20 @@ use Symfony\Component\HttpFoundation\Response;
 
 class StoreOrderRequest extends FormRequest
 {
+
+  /**
+   * Determine if the user is authorized to make this request.
+   */
   public function authorize(): bool
   {
     return true;
   }
 
+  /**
+   * Get the validation rules that apply to the request.
+   *
+   * @return array<string, \Illuminate\Contracts\Validation\Rule|array|string>
+   */
   public function rules(): array
   {
     return [
@@ -28,6 +37,14 @@ class StoreOrderRequest extends FormRequest
     ];
   }
 
+  /**
+   * Handle a failed validation attempt.
+   *
+   * @param  \Illuminate\Contracts\Validation\Validator  $validator
+   * @return void
+   *
+   * @throws \Illuminate\Http\Exceptions\HttpResponseException
+   */
   protected function failedValidation(Validator $validator): void
   {
     throw new HttpResponseException(
