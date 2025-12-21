@@ -8,8 +8,10 @@ use App\Mail\OrderStatusChangedMail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
-use Throwable;
 
+/**
+ * Notification for Order Status Change 
+ */
 class OrderStatusChangedNotification extends Notification implements ShouldQueue
 {
   use Queueable;
@@ -17,11 +19,23 @@ class OrderStatusChangedNotification extends Notification implements ShouldQueue
   public $tries = 3;
   public $timeout = 60;
 
+  /**
+   * Create a new notification instance.
+   *
+   * @param OrderStatusChanged $event
+   */
   public function __construct(
     public OrderStatusChanged $event
   ) {
   }
 
+  /**
+   * Get the notification's delivery channels.
+   *
+   * @param  mixed $notifiable
+   *
+   * @return array
+   */
   public function via($notifiable): array
   {
     // dd($notifiable);
@@ -85,10 +99,9 @@ class OrderStatusChangedNotification extends Notification implements ShouldQueue
   /**
    * Handle a job failure.
    *
-   * @param  Throwable  $exception
-   * @return void
+   * @param \Throwable $exception
    */
-  public function failed(Throwable $exception): void
+  public function failed(\Throwable $exception): void
   {
     Logger::error('OrderStatusChangedNotification::failed()', [
       'exception' => get_class($exception),

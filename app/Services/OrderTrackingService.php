@@ -14,6 +14,9 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
+/**
+ * Main bussiness logic of Service for Order Tracking.
+ */
 class OrderTrackingService implements OrderTrackingServiceInterface
 {
   public function __construct(
@@ -74,7 +77,9 @@ class OrderTrackingService implements OrderTrackingServiceInterface
 
   public function updateOrder(string $order_number, array $data): Order
   {
-    $order = Order::with('tags')->where('order_number', $order_number)->firstOrFail();
+    $order = Order::with('tags')
+      ->where('order_number', $order_number)
+      ->firstOrFail();
     $previous_status = $order->status();
 
     $order = DB::transaction(function () use ($order, $data) {
@@ -96,20 +101,23 @@ class OrderTrackingService implements OrderTrackingServiceInterface
         try {
           $this->externalOrderStatusService->syncStatus($order);
         } catch (\RuntimeException $e) {
-          Logger::error('External order status sync failed, continuing with order update', [
-            'order_id' => $order->id(),
-            'order_number' => $order->orderNumber(),
-            'exception' => get_class($e),
-            'message' => $e->getMessage(),
+          Logger::error(
+            'External order status sync failed, continuing with order update', [
+              'order_id' => $order->id(),
+              'order_number' => $order->orderNumber(),
+              'exception' => get_class($e),
+              'message' => $e->getMessage(),
           ]);
         }
       } else {
-        Logger::warning('External order status API is unhealthy, skipping sync', [
-          'order_id' => $order->id(),
-          'order_number' => $order->orderNumber(),
+        Logger::warning(
+          'External order status API is unhealthy, skipping sync', [
+            'order_id' => $order->id(),
+            'order_number' => $order->orderNumber(),
         ]);
       }
 
+      // Dispatch OrderStatusChanged event.
       OrderStatusChanged::dispatch($order, $previous_status, $order->status());
     }
 
