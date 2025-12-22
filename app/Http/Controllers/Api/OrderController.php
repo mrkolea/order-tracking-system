@@ -49,9 +49,8 @@ class OrderController extends Controller
       ]);
 
       return response()->json([
-        'message' => 'An error occurred while fetching orders',
-        'error' => config('app.debug') ?
-          $e->getMessage() : 'Internal server error',
+        'message' => 'Unable to retrieve orders. Please try again or contact support.',
+        'error' => config('app.debug') ? $e->getMessage() : null,
       ], Response::HTTP_INTERNAL_SERVER_ERROR);
     }
   }
@@ -78,7 +77,7 @@ class OrderController extends Controller
       ]);
 
       return response()->json([
-        'message' => 'Validation failed',
+        'message' => 'Please check the provided information and correct the errors below.',
         'errors' => $e->errors(),
       ], Response::HTTP_UNPROCESSABLE_ENTITY);
     }
@@ -92,9 +91,8 @@ class OrderController extends Controller
       ]);
 
       return response()->json([
-        'message' => 'An error occurred while creating the order',
-        'error' => config('app.debug') ?
-          $e->getMessage() : 'Internal server error',
+        'message' => 'Unable to create order. Please try again or contact support.',
+        'error' => config('app.debug') ? $e->getMessage() : null,
       ], Response::HTTP_INTERNAL_SERVER_ERROR);
     }
   }
@@ -107,10 +105,13 @@ class OrderController extends Controller
    */
   public function show(ShowOrderRequest $request): JsonResponse
   {
+    $order_number = null;
     try {
+      $validated = $request->validated();
+      $order_number = $validated['order_number'] ?? 'none';
       $order = $this
         ->orderTrackingService
-        ->getOrderByNumber($request->validated()['order_number']);
+        ->getOrderByNumber($order_number);
       return (new OrderResource($order))
         ->response()
         ->setStatusCode(Response::HTTP_OK);
@@ -119,12 +120,11 @@ class OrderController extends Controller
       Logger::warning('Order not found in OrderController::show()', [
         'exception' => get_class($e),
         'message' => $e->getMessage(),
-        'order_number' => $request->validated()['order_number'] ?? 'unknown',
+        'order_number' => $order_number ?? 'none',
       ]);
 
       return response()->json([
-        'message' => 'Order not found',
-        'error' => config('app.debug') ? $e->getMessage() : 'Order not found',
+        'message' => 'Order not found. Please verify the order number.',
       ], Response::HTTP_NOT_FOUND);
     }
     catch (\Exception $e) {
@@ -134,13 +134,12 @@ class OrderController extends Controller
         'file' => $e->getFile(),
         'line' => $e->getLine(),
         'trace' => $e->getTraceAsString(),
-        'order_number' => $request->validated()['order_number'] ?? 'unknown',
+        'order_number' => $order_number ?? 'none',
       ]);
 
       return response()->json([
-        'message' => 'An error occurred while fetching the order',
-        'error' => config('app.debug') ?
-          $e->getMessage() : 'Internal server error',
+        'message' => 'Unable to retrieve order details. Please try again or contact support.',
+        'error' => config('app.debug') ? $e->getMessage() : null,
       ], Response::HTTP_INTERNAL_SERVER_ERROR);
     }
   }
@@ -156,7 +155,7 @@ class OrderController extends Controller
     $order_number = null;
     try {
       $validated = $request->validated();
-      $order_number = $validated['order_number'];
+      $order_number = $validated['order_number'] ?? 'none';
       unset($validated['order_number']);
 
       $order = $this
@@ -166,6 +165,30 @@ class OrderController extends Controller
         ->response()
         ->setStatusCode(Response::HTTP_OK);
     }
+    catch (ModelNotFoundException $e) {
+      Logger::warning('Order not found in OrderController::update()', [
+        'exception' => get_class($e),
+        'message' => $e->getMessage(),
+        'order_number' => $order_number ?? 'none',
+      ]);
+
+      return response()->json([
+        'message' => 'Order not found. Please verify the order number.',
+      ], Response::HTTP_NOT_FOUND);
+    }
+    catch (ValidationException $e) {
+      Logger::warning('Validation error in OrderController::update()', [
+        'exception' => get_class($e),
+        'message' => $e->getMessage(),
+        'errors' => $e->errors(),
+        'order_number' => $order_number ?? 'none',
+      ]);
+
+      return response()->json([
+        'message' => 'Please correct the errors below.',
+        'errors' => $e->errors(),
+      ], Response::HTTP_UNPROCESSABLE_ENTITY);
+    }
     catch (\Exception $e) {
       Logger::error('Error in OrderController::update()', [
         'exception' => get_class($e),
@@ -173,13 +196,12 @@ class OrderController extends Controller
         'file' => $e->getFile(),
         'line' => $e->getLine(),
         'trace' => $e->getTraceAsString(),
-        'order_number' => $order_number ?? 'unknown',
+        'order_number' => $order_number ?? 'none',
       ]);
 
       return response()->json([
-        'message' => 'An error occurred while updating the order',
-        'error' => config('app.debug') ?
-          $e->getMessage() : 'Internal server error',
+        'message' => 'Unable to update order. Please try again or contact support.',
+        'error' => config('app.debug') ? $e->getMessage() : null,
       ], Response::HTTP_INTERNAL_SERVER_ERROR);
     }
   }
@@ -192,8 +214,10 @@ class OrderController extends Controller
    */
   public function destroy(DeleteOrderRequest $request): JsonResponse
   {
+    $order_number = null;
     try {
-      $order_number = $request->validated()['order_number'];
+      $validated = $request->validated();
+      $order_number = $validated['order_number'] ?? 'none';
       $deleted = $this->orderTrackingService->deleteOrder($order_number);
 
       if ($deleted) {
@@ -201,8 +225,19 @@ class OrderController extends Controller
       }
 
       return response()->json([
-        'message' => 'Order already deleted',
+        'message' => 'Order already deleted.',
       ], Response::HTTP_OK);
+    }
+    catch (ModelNotFoundException $e) {
+      Logger::warning('Order not found in OrderController::destroy()', [
+        'exception' => get_class($e),
+        'message' => $e->getMessage(),
+        'order_number' => $order_number ?? 'none',
+      ]);
+
+      return response()->json([
+        'message' => 'Order not found. Please verify the order number.',
+      ], Response::HTTP_NOT_FOUND);
     }
     catch (\Exception $e) {
       Logger::error('Error in OrderController::destroy()', [
@@ -211,13 +246,12 @@ class OrderController extends Controller
         'file' => $e->getFile(),
         'line' => $e->getLine(),
         'trace' => $e->getTraceAsString(),
-        'order_number' => $request->validated()['order_number'] ?? 'unknown',
+        'order_number' => $order_number ?? 'none',
       ]);
 
       return response()->json([
-        'message' => 'An error occurred while deleting the order',
-        'error' => config('app.debug') ?
-          $e->getMessage() : 'Internal server error',
+        'message' => 'Unable to delete order. Please try again or contact support.',
+        'error' => config('app.debug') ? $e->getMessage() : null,
       ], Response::HTTP_INTERNAL_SERVER_ERROR);
     }
   }
