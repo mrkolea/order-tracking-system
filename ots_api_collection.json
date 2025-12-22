@@ -51,7 +51,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"order_number\": \"ORD-1003\",\n    \"tags\": [\n        \"ISN4\"\n    ],\n    \"status\": \"pending\"\n}\n// pending\n// shipped",
+					"raw": "{\n    \"tags\": [\n        \"ISN4\"\n    ],\n    \"status\": \"shipped\"\n}\n// pending\n// shipped",
 					"options": {
 						"raw": {
 							"language": "json"
